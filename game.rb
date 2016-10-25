@@ -2,9 +2,8 @@ require 'set'
 
 class Game
   attr_reader :generation
-  attr_reader :live_cells
 
-  def initialize(rows, cols, seed)
+  def initialize(seed)
     @live_cells = Set.new(seed)
     @generation = 0
   end
@@ -26,21 +25,22 @@ class Game
     dead_cells.each do |dead_cell|
       new_generation << dead_cell if will_be_born?(dead_cell)
     end
+
     new_generation
   end
 
   def neighbors(cell)
-    x = cell[0]
-    y = cell[1]
+    y = cell[0]
+    x = cell[1]
 
-    [[x-1, y+1],
-     [x, y+1],
-     [x+1, y+1],
-     [x-1, y],
-     [x+1, y],
-     [x-1, y-1],
-     [x, y-1],
-     [x+1, y-1]]
+    [[y-1, x-1],
+     [y-1, x],
+     [y-1, x+1],
+     [y, x-1],
+     [y, x+1],
+     [y+1, x-1],
+     [y+1, x],
+     [y+1, x+1]]
   end
 
   def will_live_on?(live_cell)
@@ -62,5 +62,13 @@ class Game
     neighbors(live_cell).reject do |neighbor|
       @live_cells.include?(neighbor)
     end
+  end
+
+  def alive?(cell)
+    @live_cells.include?(cell)
+  end
+
+  def live_cells
+    @live_cells.to_a.freeze
   end
 end

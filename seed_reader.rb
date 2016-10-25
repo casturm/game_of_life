@@ -1,42 +1,20 @@
 require 'CSV'
 
 class SeedReader
+  attr_reader :rows
+  attr_reader :cols
+  attr_reader :seed
+
   def initialize(file)
-    @file = file
-  end
-
-  def lines(&block)
-    CSV.foreach(@file) do |line|
-      yield line if block
-    end
-  end
-
-  def rows
-    rows = 0
-    lines { rows = rows + 1 }
-    rows
-  end
-
-  def cols
-    cols = Array.new
-    lines do |line|
-      cols << line.size
-    end
-    raise "columns mismatch #{cols}" if cols.uniq.size > 1
-    cols[0]
-  end
-
-  def parse
-    lines = Array.new
-    lines do |line|
-      lines << line
-    end
     seed = Array.new
-    lines.each_with_index do |line, r|
-      line.each_with_index do |value, c|
-        seed << [r, c] if value == 'x'
-      end
+    values = CSV.foreach(file) do |row|
+      puts "#{row}"
+      seed << row.map(&:to_i)
     end
-    seed
+    puts "#{seed}"
+    @rows = seed[0][0]
+    @cols = seed[0][1]
+    @seed = seed.drop(1)
+    puts "#{@rows} #{@cols} #{@seed}"
   end
 end

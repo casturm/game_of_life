@@ -26,9 +26,10 @@ def print_screen(rows, cols, game, speed)
     print "\n\r"
     cols.times do |c|
       print "|"
-      if game.live_cells.include?([r,c])
+      if game.alive?([r,c])
         print "\u2638 "
       else
+        #print "#{r},#{c}"
         print '  '
       end
     end
@@ -43,10 +44,10 @@ def print_screen(rows, cols, game, speed)
   game.tick
 end
 
+seed = reader.seed
 rows = reader.rows
 cols = reader.cols
-seed = reader.parse
-game = Game.new(rows, cols, seed)
+game = Game.new(seed)
 print '|'
 cols.times do
   print "---"
