@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+require 'terminfo'
+require_relative 'controls'
+require_relative 'screen'
+require_relative 'seed_reader'
+require_relative 'game'
+
+class Play
+  def self.play
+    begin
+      reader = SeedReader.new("seed.csv")#(ARGV[0])
+      controls = Controls.new("controls.csv")#(ARGV[1])
+
+      seed = reader.seed
+      term_rows = TermInfo.screen_size[0]
+      game_rows = (term_rows/2)-3
+      term_cols = TermInfo.screen_size[1] - 1
+      game_cols = term_cols/3
+      game = Game.new(seed)
+
+      print "\e[s"    # save the cursor position
+      print "\e[?47h" # save the screen
+      loop do
+        begin
+          print "\e[?25l" # hide the cursor
+          Screen.draw(game_rows, game_cols, game, controls.speed)
+        rescue Exception => e
+        end
+        if e
+          print "\e[?25h" # redisplay the cursor
+          message = 'Quit? (y/n): '
+          loop do
+            print "\r\e[K"
+            print "\r\e[#{term_rows-1};0H\e[1;37m\e[K#{message}"
+            answer = gets.chomp
+            case
+            when answer == ''
+              print "\e[1A"   # move back up one line
+            when answer == 'y'
+              print "\e[u"    # goto the saved cursor position
+              print "\e[?47l" # restore the screen
+              raise e
+            when answer == 'n'
+              print "\e[1A\r\e[K" # erase the prompt
+              break
+            else
+              message = 'Try (y/n) Quit? '
+            end
+          end
+        end
+      end
+    rescue Interrupt => exc
+    end
+  end
+end
+
+Play.play
